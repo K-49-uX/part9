@@ -1,3 +1,5 @@
+import { isNotNumber } from './utils.js';
+
 interface Result {
   periodLength: number;
   trainingDays: number;
@@ -7,6 +9,36 @@ interface Result {
   target: number;
   average: number;
 }
+
+interface ExerciseValues {
+  target: number;
+  dailyHours: number[];
+}
+
+const parseArguments = (args: string[]): ExerciseValues => {
+  if (args.length < 4) throw new Error('Not enough arguments');
+
+  // First argument is target (args[2]), remaining arguments are daily hours (args[3] onwards)
+  const targetInput = args[2];
+  const hoursInputs = args.slice(3);
+
+  if (isNotNumber(targetInput)) {
+    throw new Error('Provided target value was not a number!');
+  }
+
+  const dailyHours: number[] = [];
+  for (const hour of hoursInputs) {
+    if (isNotNumber(hour)) {
+      throw new Error('Provided daily hours included non-number values!');
+    }
+    dailyHours.push(Number(hour));
+  }
+
+  return {
+    target: Number(targetInput),
+    dailyHours
+  };
+};
 
 const calculateExercises = (dailyHours: number[], target: number): Result => {
   const periodLength = dailyHours.length;
@@ -40,4 +72,13 @@ const calculateExercises = (dailyHours: number[], target: number): Result => {
   };
 };
 
-console.log(calculateExercises([3, 0, 2, 4.5, 0, 3, 1], 2));
+try {
+  const { target, dailyHours } = parseArguments(process.argv);
+  console.log(calculateExercises(dailyHours, target));
+} catch (error: unknown) {
+  let errorMessage = 'Something went wrong: ';
+  if (error instanceof Error) {
+    errorMessage += error.message;
+  }
+  console.log(errorMessage);
+}
