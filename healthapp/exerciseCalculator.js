@@ -1,44 +1,18 @@
-import { isNotNumber } from './utils.js';
-const parseArguments = (args) => {
-    if (args.length < 4)
-        throw new Error('Not enough arguments');
-    // First argument is target (args[2]), remaining arguments are daily hours (args[3] onwards)
-    const targetInput = args[2];
-    const hoursInputs = args.slice(3);
-    if (isNotNumber(targetInput)) {
-        throw new Error('Provided target value was not a number!');
-    }
-    const dailyHours = [];
-    for (const hour of hoursInputs) {
-        if (isNotNumber(hour)) {
-            throw new Error('Provided daily hours included non-number values!');
-        }
-        dailyHours.push(Number(hour));
-    }
-    return {
-        target: Number(targetInput),
-        dailyHours
-    };
-};
-const calculateExercises = (dailyHours, target) => {
-    const periodLength = dailyHours.length;
-    const trainingDays = dailyHours.filter(hours => hours > 0).length;
-    const totalHours = dailyHours.reduce((sum, hours) => sum + hours, 0);
+export const calculateExercises = (dailyExercises, target) => {
+    const periodLength = dailyExercises.length;
+    const trainingDays = dailyExercises.filter(d => d > 0).length;
+    const totalHours = dailyExercises.reduce((sum, current) => sum + current, 0);
     const average = totalHours / periodLength;
     const success = average >= target;
-    let rating;
-    let ratingDescription;
+    let rating = 1;
+    let ratingDescription = 'bad';
     if (average >= target) {
         rating = 3;
-        ratingDescription = 'great job, target reached!';
+        ratingDescription = 'good job, you reached your target!';
     }
     else if (average >= target * 0.75) {
         rating = 2;
         ratingDescription = 'not too bad but could be better';
-    }
-    else {
-        rating = 1;
-        ratingDescription = 'needs a lot of improvement';
     }
     return {
         periodLength,
@@ -50,14 +24,23 @@ const calculateExercises = (dailyHours, target) => {
         average
     };
 };
-try {
-    const { target, dailyHours } = parseArguments(process.argv);
-    console.log(calculateExercises(dailyHours, target));
-}
-catch (error) {
-    let errorMessage = 'Something went wrong: ';
-    if (error instanceof Error) {
-        errorMessage += error.message;
+if (process.argv[1] === import.meta.filename) {
+    try {
+        const args = process.argv.slice(2);
+        if (args.length < 2)
+            throw new Error('Not enough arguments');
+        const target = Number(args[0]);
+        const exercises = args.slice(1).map(arg => Number(arg));
+        if (isNaN(target) || exercises.some(isNaN)) {
+            throw new Error('Provided values were not numbers!');
+        }
+        console.log(calculateExercises(exercises, target));
     }
-    console.log(errorMessage);
+    catch (error) {
+        let errorMessage = 'Something went wrong: ';
+        if (error instanceof Error) {
+            errorMessage += error.message;
+        }
+        console.log(errorMessage);
+    }
 }
