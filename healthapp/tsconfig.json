@@ -1,8 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es2022",
+    "target": "esnext",
+    "noEmit": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
     "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "noImplicitAny": true
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": true
   }
 }
