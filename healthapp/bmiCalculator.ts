@@ -1,25 +1,6 @@
 import { isNotNumber } from './utils.js';
 
-interface BmiValues {
-  height: number;
-  weight: number;
-}
-
-const parseArguments = (args: string[]): BmiValues => {
-  if (args.length < 4) throw new Error('Not enough arguments');
-  if (args.length > 4) throw new Error('Too many arguments');
-
-  if (!isNotNumber(args[2]) && !isNotNumber(args[3])) {
-    return {
-      height: Number(args[2]),
-      weight: Number(args[3])
-    };
-  } else {
-    throw new Error('Provided values were not numbers!');
-  }
-};
-
-const calculateBmi = (height: number, weight: number): string => {
+export const calculateBmi = (height: number, weight: number): string => {
   const heightInMeters = height / 100;
   const bmi = weight / (heightInMeters * heightInMeters);
 
@@ -42,13 +23,23 @@ const calculateBmi = (height: number, weight: number): string => {
   }
 };
 
-try {
-  const { height, weight } = parseArguments(process.argv);
-  console.log(calculateBmi(height, weight));
-} catch (error: unknown) {
-  let errorMessage = 'Something went wrong: ';
-  if (error instanceof Error) {
-    errorMessage += error.message;
+if (process.argv[1] === import.meta.filename) {
+  try {
+    if (process.argv.length < 4) throw new Error('Not enough arguments');
+    if (process.argv.length > 4) throw new Error('Too many arguments');
+
+    if (!isNotNumber(process.argv[2]) && !isNotNumber(process.argv[3])) {
+      const height = Number(process.argv[2]);
+      const weight = Number(process.argv[3]);
+      console.log(calculateBmi(height, weight));
+    } else {
+      throw new Error('Provided values were not numbers!');
+    }
+  } catch (error: unknown) {
+    let errorMessage = 'Something went wrong: ';
+    if (error instanceof Error) {
+      errorMessage += error.message;
+    }
+    console.log(errorMessage);
   }
-  console.log(errorMessage);
 }
