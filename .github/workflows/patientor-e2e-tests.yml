@@ -23,7 +23,9 @@ jobs:
 
     - name: Start patientor backend
       working-directory: ./patientor/backend
-      run: npm start &
+      run: |
+        nohup npm start > backend.log 2>&1 &
+        echo $! > backend.pid
 
     - name: Install patientor frontend dependencies
       working-directory: ./patientor/frontend
@@ -35,7 +37,9 @@ jobs:
 
     - name: Start patientor frontend preview
       working-directory: ./patientor/frontend
-      run: npx vite preview --port 5173 &
+      run: |
+        nohup npx vite preview --port 5173 > frontend.log 2>&1 &
+        echo $! > frontend.pid
 
     - name: Install e2e test dependencies
       working-directory: ./patientor-tests

@@ -28,7 +28,7 @@ jobs:
     - name: Start patientor backend server
       working-directory: ./patientor/backend
       run: |
-        npm start &
+        nohup npm start > server.log 2>&1 &
         echo $! > server.pid
         sleep 3
 
