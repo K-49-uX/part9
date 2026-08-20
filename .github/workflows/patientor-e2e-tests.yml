@@ -56,6 +56,14 @@ jobs:
       working-directory: ./patientor-tests
       run: npm test
 
+    - name: Print logs on failure
+      if: failure()
+      run: |
+        echo "=== BACKEND LOGS ==="
+        cat ./patientor/backend/backend.log
+        echo "=== FRONTEND LOGS ==="
+        cat ./patientor/frontend/frontend.log
+
     - name: Upload test report
       uses: actions/upload-artifact@v5
       if: always()
