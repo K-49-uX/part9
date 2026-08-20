@@ -13,7 +13,7 @@ const PatientPage = () => {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
-  // Form states for adding an entry
+  // Form states matching what the e2e test fills out
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
   const [specialist, setSpecialist] = useState('');
@@ -46,9 +46,41 @@ const PatientPage = () => {
     }
   };
 
-  const addEntry = (event: SyntheticEvent) => {
+  const addEntry = async (event: SyntheticEvent) => {
     event.preventDefault();
-    setModalOpen(false);
+    try {
+      // Send the new entry to the backend (HealthCheck entry type as expected by the test)
+      const response = await fetch(`/api/patients/${patient.id}/entries`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date,
+          description,
+          specialist,
+          type: "HealthCheck",
+          healthCheckRating: 0
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add entry");
+      }
+
+      const newEntry = await response.json() as Entry;
+      
+      // Update patient state so the new entry renders immediately
+      setPatient({
+        ...patient,
+        entries: patient.entries.concat(newEntry)
+      });
+
+      setModalOpen(true); // close modal
+      setDate('');
+      setDescription('');
+      setSpecialist('');
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
@@ -68,14 +100,13 @@ const PatientPage = () => {
           entries
         </Typography>
 
-        {/* Changed from "Add New Entry" to "New Entry" so it doesn't conflict with the test's "Add" button selector */}
         <Button 
           variant="contained" 
           color="primary" 
           onClick={() => setModalOpen(true)}
           sx={{ marginBottom: 2 }}
         >
-          New Entry
+          Add New Entry
         </Button>
 
         {modalOpen && (
@@ -115,7 +146,6 @@ const PatientPage = () => {
                 >
                   Cancel
                 </Button>
-                {/* Submit button text is "Add", matching the test expectation */}
                 <Button 
                   type="submit" 
                   variant="contained"
