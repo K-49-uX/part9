@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, SyntheticEvent } from "react";
 import { useParams } from "react-router-dom";
-import { Container, Typography, Box, Button } from "@mui/material";
+import { Container, Typography, Box, Button, TextField } from "@mui/material";
 import MaleIcon from '@mui/icons-material/Male';
 import FemaleIcon from '@mui/icons-material/Female';
 import TransgenderIcon from '@mui/icons-material/Transgender';
@@ -12,6 +12,11 @@ const PatientPage = () => {
   const { id } = useParams<{ id: string }>();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
+
+  // Form states for adding an entry
+  const [date, setDate] = useState('');
+  const [description, setDescription] = useState('');
+  const [specialist, setSpecialist] = useState('');
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -41,6 +46,13 @@ const PatientPage = () => {
     }
   };
 
+  const addEntry = (event: SyntheticEvent) => {
+    event.preventDefault();
+    // Here you can hook up your backend service call when submitting entry values:
+    // e.g., patientService.addEntry(patient.id, { date, description, specialist, ... })
+    setModalOpen(false);
+  };
+
   return (
     <Container>
       <Box sx={{ marginTop: 3 }}>
@@ -68,17 +80,50 @@ const PatientPage = () => {
         </Button>
 
         {modalOpen && (
-          <Box sx={{ border: '1px solid grey', padding: 2, marginBottom: 2 }}>
-            <Typography variant="h6">Add Entry Form Modal Placeholder</Typography>
-            {/* TODO: Place your AddEntryForm component here once you've created it */}
-            <Button 
-              color="secondary" 
-              variant="contained" 
-              onClick={() => setModalOpen(false)}
-              sx={{ marginTop: 2 }}
-            >
-              Cancel
-            </Button>
+          <Box sx={{ border: '1px solid grey', padding: 2, marginBottom: 2, borderRadius: 1 }}>
+            <Typography variant="h6" sx={{ marginBottom: 2 }}>New Entry</Typography>
+            <form onSubmit={addEntry}>
+              <TextField
+                label="Date"
+                type="date"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                value={date}
+                onChange={({ target }) => setDate(target.value)}
+                sx={{ marginBottom: 2 }}
+              />
+              <TextField
+                label="Description"
+                fullWidth
+                value={description}
+                onChange={({ target }) => setDescription(target.value)}
+                sx={{ marginBottom: 2 }}
+              />
+              <TextField
+                label="Specialist"
+                fullWidth
+                value={specialist}
+                onChange={({ target }) => setSpecialist(target.value)}
+                sx={{ marginBottom: 2 }}
+              />
+
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+                <Button 
+                  color="secondary" 
+                  variant="contained" 
+                  type="button"
+                  onClick={() => setModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  variant="contained"
+                >
+                  Add
+                </Button>
+              </Box>
+            </form>
           </Box>
         )}
 
