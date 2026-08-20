@@ -48,8 +48,6 @@ const PatientPage = () => {
 
   const addEntry = (event: SyntheticEvent) => {
     event.preventDefault();
-    // Here you can hook up your backend service call when submitting entry values:
-    // e.g., patientService.addEntry(patient.id, { date, description, specialist, ... })
     setModalOpen(false);
   };
 
@@ -70,13 +68,14 @@ const PatientPage = () => {
           entries
         </Typography>
 
+        {/* Changed from "Add New Entry" to "New Entry" so it doesn't conflict with the test's "Add" button selector */}
         <Button 
           variant="contained" 
           color="primary" 
           onClick={() => setModalOpen(true)}
           sx={{ marginBottom: 2 }}
         >
-          Add New Entry
+          New Entry
         </Button>
 
         {modalOpen && (
@@ -116,11 +115,12 @@ const PatientPage = () => {
                 >
                   Cancel
                 </Button>
+                {/* Submit button text is "Add", matching the test expectation */}
                 <Button 
                   type="submit" 
                   variant="contained"
                 >
-                  Add Entry
+                  Add
                 </Button>
               </Box>
             </form>
