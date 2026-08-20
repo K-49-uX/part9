@@ -1,7 +1,6 @@
-import express, { type Request, type Response } from 'express';
-import patientService from '../patientService.ts';
-import toNewPatient from '../utils.ts';
-import { z } from 'zod';
+import express, { Request, Response } from 'express';
+import patientService from '../patientService.js';
+import { NewPatientEntry, Patient } from '../types.js';
 
 const router = express.Router();
 
@@ -9,18 +8,27 @@ router.get('/', (_req: Request, res: Response) => {
   res.json(patientService.getNonSensitivePatients());
 });
 
+router.get('/:id', (req: Request, res: Response) => {
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const patient: Patient | undefined = patientService.findById(id);
+  if (patient) {
+    res.json(patient);
+  } else {
+    res.status(404).send({ error: 'Patient not found' });
+  }
+});
+
 router.post('/', (req: Request, res: Response) => {
   try {
-    const newPatient = toNewPatient(req.body);
-    const addedPatient = patientService.addPatient(newPatient);
+    const newPatientEntry = req.body as NewPatientEntry;
+    const addedPatient = patientService.addPatient(newPatientEntry);
     res.json(addedPatient);
   } catch (error: unknown) {
-    if (error instanceof z.ZodError) {
-      res.status(400).send({ error: error.issues });
-    } else {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      res.status(400).send({ error: errorMessage });
+    let errorMessage = 'Something went wrong.';
+    if (error instanceof Error) {
+      errorMessage += ' Error: ' + error.message;
     }
+    res.status(400).send(errorMessage);
   }
 });
 

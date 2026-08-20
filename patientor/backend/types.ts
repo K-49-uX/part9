@@ -9,7 +9,7 @@ export interface Diagnosis {
 export const Gender = {
   Male: 'male',
   Female: 'female',
-  Other: 'other'
+  Other: 'other',
 } as const;
 
 export type Gender = typeof Gender[keyof typeof Gender];
@@ -23,11 +23,16 @@ export const NewPatientSchema = z.object({
   entries: z.array(z.unknown()).default([])
 });
 
-// Export type assertion cleanly
-export type NewPatient = z.infer<typeof NewPatientSchema>;
-
-export interface Patient extends NewPatient {
+export interface Patient {
   id: string;
+  name: string;
+  dateOfBirth: string;
+  ssn?: string;
+  gender: Gender;
+  occupation: string;
+  entries: unknown[];
 }
 
+export type NewPatientEntry = z.infer<typeof NewPatientSchema>;
+export type NewPatient = NewPatientEntry;
 export type NonSensitivePatient = Omit<Patient, 'ssn' | 'entries'>;

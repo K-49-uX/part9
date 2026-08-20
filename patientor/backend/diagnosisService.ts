@@ -1,5 +1,5 @@
-import diagnoseEntries from './data/diagnoses.ts';
-import type { Diagnosis } from './types.ts';
+import diagnoseEntries from './data/diagnoses.js';
+import type { Diagnosis } from './types.js';
 
 const getEntries = (): Diagnosis[] => {
   return diagnoseEntries;

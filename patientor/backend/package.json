@@ -3,13 +3,12 @@
   "version": "1.0.0",
   "description": "Backend for Patientor medical record application",
   "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "tsc": "tsc",
-    "dev": "concurrently \"tsc --watch\" \"node --watch --experimental-transform-types index.ts\"",
-    "start": "node --experimental-transform-types index.ts",
-    "lint": "eslint ."
-  },
+  "type": "module","scripts": {
+  "tsc": "tsc",
+  "lint": "eslint . --ext .ts",
+"dev": "concurrently \"tsc -w\" \"nodemon build/index.js\"",
+  "start": "node build/index.js"
+},
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1",

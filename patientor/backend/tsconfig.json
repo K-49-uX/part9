@@ -1,14 +1,13 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "noEmit": true,
+    "target": "ES2022",
     "module": "nodenext",
-    "esModuleInterop": true,
-    "allowImportingTsExtensions": true,
+    "moduleResolution": "nodenext",
+    "outDir": "./build",
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
-  }
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "include": ["./**/*"],
+  "exclude": ["node_modules", "build"]
 }

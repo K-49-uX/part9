@@ -1,24 +1,34 @@
-import axios from 'axios';
-import { apiBaseUrl } from '../constants';
+import axios from "axios";
+import { Patient, PatientFormValues } from "../types";
 
+import { apiBaseUrl } from "../constants";
+const api = axios.create({
+  baseURL: 'http://localhost:3001/api', // or just '/api' if using the Vite proxy above
+});
 const getAll = async () => {
-  const { data } = await axios.get(`${apiBaseUrl}/patients`);
+  const { data } = await api.get<Patient[]>(
+    `${apiBaseUrl}/patients`
+  );
+
   return data;
 };
 
 const getOne = async (id: string) => {
-  const { data } = await axios.get(`${apiBaseUrl}/patients/${id}`);
+  const { data } = await api.get<Patient>(
+    `${apiBaseUrl}/patients/${id}`
+  );
   return data;
 };
 
-const create = async (object: Record<string, unknown>) => {
-  const { data } = await axios.post(`${apiBaseUrl}/patients`, object);
+const create = async (object: PatientFormValues) => {
+  const { data } = await api.post<Patient>(
+    `${apiBaseUrl}/patients`,
+    object
+  );
+
   return data;
 };
 
-const addEntry = async (id: string, object: Record<string, unknown>) => {
-  const { data } = await axios.post(`${apiBaseUrl}/patients/${id}/entries`, object);
-  return data;
+export default {
+  getAll, getOne, create
 };
-
-export default { getAll, getOne, create, addEntry };

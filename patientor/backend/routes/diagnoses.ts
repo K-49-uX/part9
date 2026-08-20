@@ -1,6 +1,6 @@
 import express, { type Response } from 'express';
-import type { Diagnosis } from '../types.ts';
-import diagnosisService from '../diagnosisService.ts';
+import type { Diagnosis } from '../types.js';
+import diagnosisService from '../diagnosisService.js';
 
 const router = express.Router();
 
