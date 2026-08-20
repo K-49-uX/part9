@@ -33,7 +33,7 @@ jobs:
 
     - name: Build patientor frontend
       working-directory: ./patientor/frontend
-      run: npm run build
+      run: VITE_BACKEND_URL=http://localhost:3001/api npm run build
 
     - name: Start patientor frontend preview
       working-directory: ./patientor/frontend
