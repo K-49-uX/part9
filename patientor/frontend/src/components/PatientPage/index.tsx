@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Container, Typography, Box } from "@mui/material";
+import { Container, Typography, Box, Button } from "@mui/material";
 import MaleIcon from '@mui/icons-material/Male';
 import FemaleIcon from '@mui/icons-material/Female';
 import TransgenderIcon from '@mui/icons-material/Transgender';
@@ -11,6 +11,7 @@ import patientService from "../../services/patients";
 const PatientPage = () => {
   const { id } = useParams<{ id: string }>();
   const [patient, setPatient] = useState<Patient | null>(null);
+  const [, setModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -56,6 +57,16 @@ const PatientPage = () => {
         <Typography variant="h5" component="h3" sx={{ marginTop: 3, marginBottom: 2 }}>
           entries
         </Typography>
+
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={() => setModalOpen(true)}
+          sx={{ marginBottom: 2 }}
+        >
+          Add New Entry
+        </Button>
+
         {patient.entries && patient.entries.length > 0 ? (
           patient.entries.map((entry: Entry) => (
             <Box key={entry.id} sx={{ border: '1px solid #ccc', borderRadius: '5px', padding: 2, marginBottom: 2 }}>
