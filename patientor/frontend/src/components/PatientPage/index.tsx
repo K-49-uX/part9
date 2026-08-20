@@ -120,7 +120,7 @@ const PatientPage = () => {
                   type="submit" 
                   variant="contained"
                 >
-                  Add
+                  Add Entry
                 </Button>
               </Box>
             </form>
