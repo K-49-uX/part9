@@ -11,7 +11,7 @@ import patientService from "../../services/patients";
 const PatientPage = () => {
   const { id } = useParams<{ id: string }>();
   const [patient, setPatient] = useState<Patient | null>(null);
-  const [, setModalOpen] = useState<boolean>(false);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -66,6 +66,21 @@ const PatientPage = () => {
         >
           Add New Entry
         </Button>
+
+        {modalOpen && (
+          <Box sx={{ border: '1px solid grey', padding: 2, marginBottom: 2 }}>
+            <Typography variant="h6">Add Entry Form Modal Placeholder</Typography>
+            {/* TODO: Place your AddEntryForm component here once you've created it */}
+            <Button 
+              color="secondary" 
+              variant="contained" 
+              onClick={() => setModalOpen(false)}
+              sx={{ marginTop: 2 }}
+            >
+              Cancel
+            </Button>
+          </Box>
+        )}
 
         {patient.entries && patient.entries.length > 0 ? (
           patient.entries.map((entry: Entry) => (
