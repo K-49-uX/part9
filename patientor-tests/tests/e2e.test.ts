@@ -69,7 +69,8 @@ test.describe('Adding an entry to a patient', () => {
     await page.getByLabel('Description').fill('Annual checkup, all clear');
     await page.getByLabel('Specialist').fill('Dr. Test Specialist');
 
-    await page.getByRole('button', { name: 'Add' }).click();
+    // Updated with exact: true to avoid strict mode violation with "Add New Entry"
+    await page.getByRole('button', { name: 'Add', exact: true }).click();
 
     await expect(page.getByText('Annual checkup, all clear')).toBeVisible();
   });

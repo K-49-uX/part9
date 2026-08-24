@@ -49,7 +49,6 @@ const PatientPage = () => {
   const addEntry = async (event: SyntheticEvent) => {
     event.preventDefault();
     try {
-      // Send the new entry to the backend (HealthCheck entry type as expected by the test)
       const response = await fetch(`/api/patients/${patient.id}/entries`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -66,15 +65,14 @@ const PatientPage = () => {
         throw new Error("Failed to add entry");
       }
 
-      const newEntry = await response.json() as Entry;
+      const newEntry: Entry = await response.json();
       
-      // Update patient state so the new entry renders immediately
       setPatient({
         ...patient,
         entries: patient.entries.concat(newEntry)
       });
 
-      setModalOpen(true); // close modal
+      setModalOpen(false);
       setDate('');
       setDescription('');
       setSpecialist('');
@@ -100,6 +98,7 @@ const PatientPage = () => {
           entries
         </Typography>
 
+        {/* Top button to open the entry modal */}
         <Button 
           variant="contained" 
           color="primary" 
@@ -146,6 +145,8 @@ const PatientPage = () => {
                 >
                   Cancel
                 </Button>
+                
+                {/* Form submit button */}
                 <Button 
                   type="submit" 
                   variant="contained"

@@ -10,5 +10,5 @@ export const NewPatientSchema = z.object({
     ssn: z.string(),
     gender: z.nativeEnum(Gender),
     occupation: z.string(),
-    entries: z.array(z.unknown()).default([])
+    entries: z.array(z.custom()).default([])
 });

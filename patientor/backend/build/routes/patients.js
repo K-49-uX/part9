@@ -28,4 +28,24 @@ router.post('/', (req, res) => {
         res.status(400).send(errorMessage);
     }
 });
+router.post('/:id/entries', (req, res) => {
+    try {
+        const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+        const newEntry = req.body;
+        const addedEntry = patientService.addEntry(id, newEntry);
+        if (addedEntry) {
+            res.json(addedEntry);
+        }
+        else {
+            res.status(404).send({ error: 'Patient not found' });
+        }
+    }
+    catch (error) {
+        let errorMessage = 'Something went wrong.';
+        if (error instanceof Error) {
+            errorMessage += ' Error: ' + error.message;
+        }
+        res.status(400).send(errorMessage);
+    }
+});
 export default router;

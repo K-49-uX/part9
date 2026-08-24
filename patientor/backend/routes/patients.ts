@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import patientService from '../patientService.js';
-import { NewPatientEntry, Patient } from '../types.js';
+import { NewPatientEntry, NewEntry, Patient, Entry } from '../types.js';
 
 const router = express.Router();
 
@@ -23,6 +23,26 @@ router.post('/', (req: Request, res: Response) => {
     const newPatientEntry = req.body as NewPatientEntry;
     const addedPatient = patientService.addPatient(newPatientEntry);
     res.json(addedPatient);
+  } catch (error: unknown) {
+    let errorMessage = 'Something went wrong.';
+    if (error instanceof Error) {
+      errorMessage += ' Error: ' + error.message;
+    }
+    res.status(400).send(errorMessage);
+  }
+});
+
+router.post('/:id/entries', (req: Request, res: Response) => {
+  try {
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const newEntry = req.body as NewEntry;
+    
+    const addedEntry: Entry | undefined = patientService.addEntry(id, newEntry);
+    if (addedEntry) {
+      res.json(addedEntry);
+    } else {
+      res.status(404).send({ error: 'Patient not found' });
+    }
   } catch (error: unknown) {
     let errorMessage = 'Something went wrong.';
     if (error instanceof Error) {
