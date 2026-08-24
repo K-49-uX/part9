@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react';
-import type { DiaryEntry } from './types';
-import { getAllDiaries } from './services/diaryService';
+import type { DiaryEntry, NewDiaryEntry } from './types';
+import { getAllDiaries, createDiary } from './services/diaryService';
 
 const App = () => {
   const [diaries, setDiaries] = useState<DiaryEntry[]>([]);
+  const [date, setDate] = useState('');
+  const [visibility, setVisibility] = useState('');
+  const [weather, setWeather] = useState('');
+  const [comment, setComment] = useState('');
 
   useEffect(() => {
     getAllDiaries()
@@ -15,9 +19,51 @@ const App = () => {
       });
   }, []);
 
+  const diaryCreation = (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    const newDiary: NewDiaryEntry = {
+      date,
+      visibility,
+      weather,
+      comment
+    };
+
+    createDiary(newDiary)
+      .then(data => {
+        setDiaries(diaries.concat(data));
+        setDate('');
+        setVisibility('');
+        setWeather('');
+        setComment('');
+      })
+      .catch(error => {
+        console.error("Error creating diary:", error);
+      });
+  };
+
   return (
     <div style={{ padding: "20px", textAlign: "left" }}>
       <h1>Flight Diaries</h1>
+      
+      <h2>Add new entry</h2>
+      <form onSubmit={diaryCreation} style={{ marginBottom: "20px" }}>
+        <div>
+          date: <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+        </div>
+        <div>
+          visibility: 
+          <input type="text" value={visibility} onChange={(e) => setVisibility(e.target.value)} placeholder="e.g. great, good, ok, poor" />
+        </div>
+        <div>
+          weather: 
+          <input type="text" value={weather} onChange={(e) => setWeather(e.target.value)} placeholder="e.g. sunny, rainy, cloudy" />
+        </div>
+        <div>
+          comment: <input type="text" value={comment} onChange={(e) => setComment(e.target.value)} />
+        </div>
+        <button type="submit" style={{ marginTop: "10px" }}>add</button>
+      </form>
+
       <h2>Diary entries</h2>
       {diaries.map((diary) => (
         <div key={diary.id} style={{ marginBottom: "15px" }}>
