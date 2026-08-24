@@ -3,11 +3,17 @@ import axios from 'axios';
 import type { DiaryEntry, NewDiaryEntry } from './types';
 import { getAllDiaries, createDiary } from './services/diaryService';
 
+type Weather = 'sunny' | 'rainy' | 'cloudy' | 'stormy' | 'windy';
+type Visibility = 'great' | 'good' | 'ok' | 'poor';
+
+const visibilities: Visibility[] = ['great', 'good', 'ok', 'poor'];
+const weathers: Weather[] = ['sunny', 'rainy', 'cloudy', 'stormy', 'windy'];
+
 const App = () => {
   const [diaries, setDiaries] = useState<DiaryEntry[]>([]);
   const [date, setDate] = useState('');
-  const [visibility, setVisibility] = useState('');
-  const [weather, setWeather] = useState('');
+  const [visibility, setVisibility] = useState<Visibility | ''>('');
+  const [weather, setWeather] = useState<Weather | ''>('');
   const [comment, setComment] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -25,8 +31,8 @@ const App = () => {
     event.preventDefault();
     const newDiary: NewDiaryEntry = {
       date,
-      visibility,
-      weather,
+      visibility: visibility as Visibility,
+      weather: weather as Weather,
       comment
     };
 
@@ -70,14 +76,39 @@ const App = () => {
         <div>
           date: <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
-        <div>
+        
+        <div style={{ margin: "10px 0" }}>
           visibility: 
-          <input type="text" value={visibility} onChange={(e) => setVisibility(e.target.value)} placeholder="e.g. great, good, ok, poor" />
+          {visibilities.map(v => (
+            <span key={v} style={{ marginLeft: "10px" }}>
+              <input
+                type="radio"
+                id={`visibility-${v}`}
+                name="visibility"
+                checked={visibility === v}
+                onChange={() => setVisibility(v)}
+              />
+              <label htmlFor={`visibility-${v}`} style={{ marginLeft: "4px" }}>{v}</label>
+            </span>
+          ))}
         </div>
-        <div>
+
+        <div style={{ margin: "10px 0" }}>
           weather: 
-          <input type="text" value={weather} onChange={(e) => setWeather(e.target.value)} placeholder="e.g. sunny, rainy, cloudy" />
+          {weathers.map(w => (
+            <span key={w} style={{ marginLeft: "10px" }}>
+              <input
+                type="radio"
+                id={`weather-${w}`}
+                name="weather"
+                checked={weather === w}
+                onChange={() => setWeather(w)}
+              />
+              <label htmlFor={`weather-${w}`} style={{ marginLeft: "4px" }}>{w}</label>
+            </span>
+          ))}
         </div>
+
         <div>
           comment: <input type="text" value={comment} onChange={(e) => setComment(e.target.value)} />
         </div>
