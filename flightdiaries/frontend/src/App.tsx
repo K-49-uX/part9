@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import type { DiaryEntry, NewDiaryEntry } from './types';
 import { getAllDiaries, createDiary } from './services/diaryService';
 
@@ -8,6 +9,7 @@ const App = () => {
   const [visibility, setVisibility] = useState('');
   const [weather, setWeather] = useState('');
   const [comment, setComment] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     getAllDiaries()
@@ -35,9 +37,25 @@ const App = () => {
         setVisibility('');
         setWeather('');
         setComment('');
+        setError(null);
       })
-      .catch(error => {
-        console.error("Error creating diary:", error);
+      .catch(err => {
+        if (axios.isAxiosError(err)) {
+          if (err.response) {
+            const errorMessage = typeof err.response.data === 'string' 
+              ? err.response.data 
+              : JSON.stringify(err.response.data);
+            
+            setError(errorMessage);
+            setTimeout(() => {
+              setError(null);
+            }, 5000);
+          } else {
+            setError("Network error");
+          }
+        } else {
+          setError("An unexpected error occurred");
+        }
       });
   };
 
@@ -46,6 +64,8 @@ const App = () => {
       <h1>Flight Diaries</h1>
       
       <h2>Add new entry</h2>
+      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+      
       <form onSubmit={diaryCreation} style={{ marginBottom: "20px" }}>
         <div>
           date: <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
