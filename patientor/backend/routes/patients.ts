@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import patientService from '../patientService.js';
-import { NewPatientEntry, NewEntry, Patient, Entry } from '../types.js';
+import { NewEntry, Patient, Entry, NewPatientSchema } from '../types.js';
 
 const router = express.Router();
 
@@ -20,15 +20,15 @@ router.get('/:id', (req: Request, res: Response) => {
 
 router.post('/', (req: Request, res: Response) => {
   try {
-    const newPatientEntry = req.body as NewPatientEntry;
+    const newPatientEntry = NewPatientSchema.parse(req.body);
     const addedPatient = patientService.addPatient(newPatientEntry);
     res.json(addedPatient);
   } catch (error: unknown) {
     let errorMessage = 'Something went wrong.';
     if (error instanceof Error) {
-      errorMessage += ' Error: ' + error.message;
+      errorMessage = error.message;
     }
-    res.status(400).send(errorMessage);
+    res.status(400).send({ error: errorMessage });
   }
 });
 

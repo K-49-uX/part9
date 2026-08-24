@@ -1,5 +1,6 @@
 import express from 'express';
 import patientService from '../patientService.js';
+import { NewPatientSchema } from '../types.js';
 const router = express.Router();
 router.get('/', (_req, res) => {
     res.json(patientService.getNonSensitivePatients());
@@ -16,16 +17,16 @@ router.get('/:id', (req, res) => {
 });
 router.post('/', (req, res) => {
     try {
-        const newPatientEntry = req.body;
+        const newPatientEntry = NewPatientSchema.parse(req.body);
         const addedPatient = patientService.addPatient(newPatientEntry);
         res.json(addedPatient);
     }
     catch (error) {
         let errorMessage = 'Something went wrong.';
         if (error instanceof Error) {
-            errorMessage += ' Error: ' + error.message;
+            errorMessage = error.message;
         }
-        res.status(400).send(errorMessage);
+        res.status(400).send({ error: errorMessage });
     }
 });
 router.post('/:id/entries', (req, res) => {
