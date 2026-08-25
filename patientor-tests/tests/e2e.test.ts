@@ -53,8 +53,7 @@ test.describe('Showing patient info', () => {
     await page.getByRole('link', { name: 'John McClane' }).click();
 
     // John McClane has a Hospital entry in the seed data
-    await expect(page.getByText(/Thumb has healed/)).toBeVisible();
-  });
+await expect(page.getByText(/Thumb has healed/).first()).toBeVisible();  });
 });
 
 test.describe('Adding an entry to a patient', () => {
@@ -72,6 +71,5 @@ test.describe('Adding an entry to a patient', () => {
     // Updated with exact: true to avoid strict mode violation with "Add New Entry"
     await page.getByRole('button', { name: 'Add', exact: true }).click();
 
-    await expect(page.getByText('Annual checkup, all clear')).toBeVisible();
-  });
+await expect(page.getByText('Annual checkup, all clear').first()).toBeVisible();  });
 });

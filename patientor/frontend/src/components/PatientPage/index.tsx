@@ -8,12 +8,42 @@ import TransgenderIcon from '@mui/icons-material/Transgender';
 import { Patient, Entry, Gender } from "../../types";
 import patientService from "../../services/patients";
 
+const DetailsComponent = ({ entry }: { entry: Entry }) => {
+  const item = entry as Record<string, unknown>;
+
+  switch (item.type) {
+    case "Hospital": {
+      const discharge = item.discharge as { date: string; criteria: string } | undefined;
+      return discharge ? (
+        <Typography variant="body2">
+          Discharge: {discharge.date} ({discharge.criteria})
+        </Typography>
+      ) : null;
+    }
+    case "OccupationalHealthcare": {
+      return (
+        <Typography variant="body2">
+          Employer: {String(item.employerName || '')}
+        </Typography>
+      );
+    }
+    case "HealthCheck": {
+      return (
+        <Typography variant="body2">
+          Health Rating: {String(item.healthCheckRating ?? '')}
+        </Typography>
+      );
+    }
+    default:
+      return null;
+  }
+};
+
 const PatientPage = () => {
   const { id } = useParams<{ id: string }>();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
-  // Form states matching what the e2e test fills out
   const [date, setDate] = useState('');
   const [description, setDescription] = useState('');
   const [specialist, setSpecialist] = useState('');
@@ -23,16 +53,23 @@ const PatientPage = () => {
       if (!id) return;
       try {
         const fetchedPatient = await patientService.getById(id);
+        console.log("DEBUG - Fetched patient object:", fetchedPatient);
         setPatient(fetchedPatient);
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error("DEBUG - Error fetching patient:", err);
       }
     };
     void fetchPatient();
   }, [id]);
 
   if (!patient) {
-    return <div>Loading patient data...</div>;
+    return (
+      <Container>
+        <Typography variant="h6" sx={{ marginTop: 3 }}>
+          Loading patient data...
+        </Typography>
+      </Container>
+    );
   }
 
   const getGenderIcon = (gender: Gender) => {
@@ -49,37 +86,30 @@ const PatientPage = () => {
   const addEntry = async (event: SyntheticEvent) => {
     event.preventDefault();
     try {
-      const response = await fetch(`/api/patients/${patient.id}/entries`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          date,
-          description,
-          specialist,
-          type: "HealthCheck",
-          healthCheckRating: 0
-        })
+      const newEntry = await patientService.addEntry(patient.id, {
+        date,
+        description,
+        specialist,
+        type: "HealthCheck",
+        healthCheckRating: 0
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to add entry");
-      }
-
-      const newEntry: Entry = await response.json();
       
       setPatient({
         ...patient,
-        entries: patient.entries.concat(newEntry)
+        entries: (patient.entries || []).concat(newEntry)
       });
 
       setModalOpen(false);
       setDate('');
       setDescription('');
       setSpecialist('');
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error("Error adding entry:", err);
     }
   };
+
+  console.log("DEBUG - Current patient state entries:", patient.entries);
+  const entriesList = patient.entries ?? [];
 
   return (
     <Container>
@@ -88,17 +118,19 @@ const PatientPage = () => {
           {patient.name} {getGenderIcon(patient.gender)}
         </Typography>
         <Typography variant="body1" sx={{ marginTop: 1 }}>
-          ssn: {patient.ssn || 'N/A'}
+          ssn: {patient.ssn ?? 'N/A'}
         </Typography>
         <Typography variant="body1">
           occupation: {patient.occupation}
         </Typography>
-
-        <Typography variant="h5" component="h3" sx={{ marginTop: 3, marginBottom: 2 }}>
-          entries
+        <Typography variant="body1">
+          date of birth: {patient.dateOfBirth || 'N/A'}
         </Typography>
 
-        {/* Top button to open the entry modal */}
+        <Typography variant="h5" component="h3" sx={{ marginTop: 3, marginBottom: 2 }}>
+          entries ({entriesList.length})
+        </Typography>
+
         <Button 
           variant="contained" 
           color="primary" 
@@ -146,7 +178,6 @@ const PatientPage = () => {
                   Cancel
                 </Button>
                 
-                {/* Form submit button */}
                 <Button 
                   type="submit" 
                   variant="contained"
@@ -158,17 +189,26 @@ const PatientPage = () => {
           </Box>
         )}
 
-        {patient.entries && patient.entries.length > 0 ? (
-          patient.entries.map((entry: Entry) => (
-            <Box key={entry.id} sx={{ border: '1px solid #ccc', borderRadius: '5px', padding: 2, marginBottom: 2 }}>
-              <Typography variant="body2">{entry.date} {entry.description}</Typography>
-              <ul>
-                {'diagnosisCodes' in entry && entry.diagnosisCodes?.map(code => (
-                  <li key={code}>{code}</li>
-                ))}
-              </ul>
-            </Box>
-          ))
+        {entriesList.length > 0 ? (
+          entriesList.map((entry: Entry) => {
+            const rawEntry = entry as Record<string, unknown>;
+            return (
+              <Box key={entry.id} sx={{ border: '1px solid #ccc', borderRadius: '5px', padding: 2, marginBottom: 2 }}>
+                <Typography variant="body1">
+                  {entry.date} - {entry.description}
+                </Typography>
+                <Typography variant="body2">diagnosed by {String(rawEntry.specialist || '')}</Typography>
+                <DetailsComponent entry={entry} />
+                {entry.diagnosisCodes && entry.diagnosisCodes.length > 0 && (
+                  <ul>
+                    {entry.diagnosisCodes.map((code) => (
+                      <li key={code}>{code}</li>
+                    ))}
+                  </ul>
+                )}
+              </Box>
+            );
+          })
         ) : (
           <Typography variant="body2">No entries found.</Typography>
         )}
