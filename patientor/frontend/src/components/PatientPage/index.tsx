@@ -22,7 +22,7 @@ const PatientPage = () => {
     const fetchPatient = async () => {
       if (!id) return;
       try {
-        const fetchedPatient = await patientService.getOne(id);
+        const fetchedPatient = await patientService.getById(id);
         setPatient(fetchedPatient);
       } catch (e) {
         console.error(e);
