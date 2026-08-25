@@ -21,7 +21,7 @@ router.get('/:id', (req: Request, res: Response) => {
 
 router.post('/', (req: Request, res: Response) => {
   try {
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     const newPatientEntry = NewPatientSchema(req.body);    const addedPatient = patientService.addPatient(newPatientEntry);
     res.json(addedPatient);
   } catch (error: unknown) {

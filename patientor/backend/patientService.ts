@@ -1,40 +1,39 @@
-import patientData from './data/patients.js';
-import { Patient, NonSensitivePatient, NewPatientEntry, Entry, NewEntry } from './types.js';
-import { v1 as uuid } from 'uuid';
+import patientsData from './data/patients.js';
+import { Patient, Entry, NewEntry } from './types.js';
+import { v1 as uuidv1 } from 'uuid';
 
-const patients: Patient[] = patientData as Patient[];
-
-const getEntries = (): Patient[] => {
-  return patients;
+const getPatients = (): Patient[] => {
+  return patientsData;
 };
 
-const getNonSensitivePatients = (): NonSensitivePatient[] => {
-  return patients.map(
-    ({ id, name, dateOfBirth, gender, occupation, entries }) => ({
-      id,
-      name,
-      dateOfBirth,
-      gender,
-      occupation,
-      entries: entries || [],
-    })
-  );
+const getNonSensitivePatients = (): Omit<Patient, 'ssn' | 'entries'>[] => {
+  return patientsData.map(({ id, name, dateOfBirth, gender, occupation }) => ({
+    id,
+    name,
+    dateOfBirth,
+    gender,
+    occupation,
+  }));
 };
 
 const findById = (id: string): Patient | undefined => {
-  const patient = patients.find((p) => p.id === id);
+  const patient = patientsData.find(p => p.id === id);
   return patient;
 };
 
-const addPatient = (entry: NewPatientEntry): Patient => {
-  const id = uuid();
-  const newPatientEntry: Patient = {
-    id,
-    ...entry,
-    entries: entry.entries || [],
+const addPatient = (patient: Omit<Patient, 'id'>): Patient => {
+  const newPatientId = uuidv1();
+  const newPatient: Patient = {
+    id: newPatientId,
+    name: patient.name,
+    dateOfBirth: patient.dateOfBirth,
+    ssn: patient.ssn,
+    gender: patient.gender,
+    occupation: patient.occupation,
+    entries: patient.entries ?? []
   };
-  patients.push(newPatientEntry);
-  return newPatientEntry;
+  patientsData.push(newPatient);
+  return newPatient;
 };
 
 const addEntry = (patientId: string, entry: NewEntry): Entry | undefined => {
@@ -43,23 +42,19 @@ const addEntry = (patientId: string, entry: NewEntry): Entry | undefined => {
     return undefined;
   }
 
-  const id = uuid();
- const newEntry: Entry = {
-    id,
-    ...entry,
+  const newEntry: Entry = {
+    id: uuidv1(),
+    ...entry
   };
-  if (!patient.entries) {
-    patient.entries = [];
-  }
 
   patient.entries.push(newEntry);
   return newEntry;
 };
 
 export default {
-  getEntries,
+  getPatients,
   getNonSensitivePatients,
   findById,
   addPatient,
-  addEntry,
+  addEntry
 };

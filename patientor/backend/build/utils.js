@@ -6,9 +6,12 @@ export const NewPatientSchema = z.object({
     ssn: z.string(),
     gender: z.nativeEnum(Gender),
     occupation: z.string(),
-    entries: z.array(z.any()), // or your entry validation schema
 });
 const toNewPatient = (object) => {
-    return NewPatientSchema.parse(object);
+    const parsedData = NewPatientSchema.parse(object);
+    return {
+        ...parsedData,
+        entries: []
+    };
 };
 export default toNewPatient;
