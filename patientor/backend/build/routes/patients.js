@@ -1,6 +1,6 @@
 import express from 'express';
 import patientService from '../patientService.js';
-import { NewPatientSchema } from '../types.js';
+import NewPatientSchema from '../utils.js';
 const router = express.Router();
 router.get('/', (_req, res) => {
     res.json(patientService.getNonSensitivePatients());
@@ -17,7 +17,8 @@ router.get('/:id', (req, res) => {
 });
 router.post('/', (req, res) => {
     try {
-        const newPatientEntry = NewPatientSchema.parse(req.body);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const newPatientEntry = NewPatientSchema(req.body);
         const addedPatient = patientService.addPatient(newPatientEntry);
         res.json(addedPatient);
     }
@@ -44,7 +45,7 @@ router.post('/:id/entries', (req, res) => {
     catch (error) {
         let errorMessage = 'Something went wrong.';
         if (error instanceof Error) {
-            errorMessage += ' Error: ' + error.message;
+            errorMessage = 'Error: ' + error.message;
         }
         res.status(400).send(errorMessage);
     }

@@ -1,6 +1,16 @@
-import { NewPatientSchema, type NewPatient } from './types.js';
+import { Patient, Gender } from './types.js';
+import { z } from 'zod';
 
-const toNewPatient = (object: unknown): NewPatient => {
+export const NewPatientSchema = z.object({
+  name: z.string(),
+  dateOfBirth: z.string(),
+  ssn: z.string(),
+  gender: z.nativeEnum(Gender),
+  occupation: z.string(),
+  entries: z.array(z.any()), // or your entry validation schema
+});
+
+const toNewPatient = (object: unknown): Omit<Patient, 'id'> => {
   return NewPatientSchema.parse(object);
 };
 

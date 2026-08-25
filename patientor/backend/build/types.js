@@ -1,14 +1,12 @@
-import { z } from 'zod';
-export const Gender = {
-    Male: 'male',
-    Female: 'female',
-    Other: 'other',
+export var Gender;
+(function (Gender) {
+    Gender["Male"] = "male";
+    Gender["Female"] = "female";
+    Gender["Other"] = "other";
+})(Gender || (Gender = {}));
+export const HealthCheckRating = {
+    Healthy: 0,
+    LowRisk: 1,
+    HighRisk: 2,
+    CriticalRisk: 3,
 };
-export const NewPatientSchema = z.object({
-    name: z.string(),
-    dateOfBirth: z.string(),
-    ssn: z.string(),
-    gender: z.nativeEnum(Gender),
-    occupation: z.string(),
-    entries: z.array(z.custom()).default([])
-});

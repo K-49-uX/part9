@@ -1,18 +1,14 @@
-import { z } from 'zod';
-
 export interface Diagnosis {
   code: string;
   name: string;
   latin?: string;
 }
 
-export const Gender = {
-  Male: 'male',
-  Female: 'female',
-  Other: 'other',
-} as const;
-
-export type Gender = typeof Gender[keyof typeof Gender];
+export enum Gender {
+  Male = 'male',
+  Female = 'female',
+  Other = 'other'
+}
 
 export interface BaseEntry {
   id: string;
@@ -22,13 +18,22 @@ export interface BaseEntry {
   diagnosisCodes?: Array<Diagnosis['code']>;
 }
 
+export const HealthCheckRating = {
+  Healthy: 0,
+  LowRisk: 1,
+  HighRisk: 2,
+  CriticalRisk: 3,
+} as const;
+
+export type HealthCheckRating = typeof HealthCheckRating[keyof typeof HealthCheckRating];
+
 export interface HealthCheckEntry extends BaseEntry {
-  type: 'HealthCheck';
-  healthCheckRating: number;
+  type: "HealthCheck";
+  healthCheckRating: HealthCheckRating;
 }
 
 export interface HospitalEntry extends BaseEntry {
-  type: 'Hospital';
+  type: "Hospital";
   discharge: {
     date: string;
     criteria: string;
@@ -36,7 +41,7 @@ export interface HospitalEntry extends BaseEntry {
 }
 
 export interface OccupationalHealthcareEntry extends BaseEntry {
-  type: 'OccupationalHealthcare';
+  type: "OccupationalHealthcare";
   employerName: string;
   sickLeave?: {
     startDate: string;
@@ -45,31 +50,22 @@ export interface OccupationalHealthcareEntry extends BaseEntry {
 }
 
 export type Entry =
-  | HealthCheckEntry
   | HospitalEntry
-  | OccupationalHealthcareEntry;
+  | OccupationalHealthcareEntry
+  | HealthCheckEntry;
 
-type OmitDistributive<T, K extends keyof T> = T extends unknown? Omit<T, K> : never;
-export type NewEntry = OmitDistributive<Entry, 'id'>;
-
-export const NewPatientSchema = z.object({
-  name: z.string(),
-  dateOfBirth: z.string(),
-  ssn: z.string(),
-  gender: z.nativeEnum(Gender),
-  occupation: z.string(),
-  entries: z.array(z.custom<Entry>()).default([])
-});
+// Special omit for unions
+export type UnionOmit<T, K extends string | number | symbol> = T extends unknown ? Omit<T, K> : never;
+export type NewEntry = UnionOmit<Entry, 'id'>;
 
 export interface Patient {
   id: string;
   name: string;
   dateOfBirth: string;
-  ssn: string;
+  ssn?: string;
   gender: Gender;
   occupation: string;
   entries: Entry[];
 }
 
-export type NewPatientEntry = z.infer<typeof NewPatientSchema>;
 export type NonSensitivePatient = Omit<Patient, 'ssn' | 'entries'>;
