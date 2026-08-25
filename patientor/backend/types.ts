@@ -14,7 +14,6 @@ export const Gender = {
 
 export type Gender = typeof Gender[keyof typeof Gender];
 
-// Define base entry structure and specific entry types if needed, or keep a flexible union/interface
 export interface BaseEntry {
   id: string;
   description: string;
@@ -25,7 +24,7 @@ export interface BaseEntry {
 
 export interface HealthCheckEntry extends BaseEntry {
   type: 'HealthCheck';
-  healthCheckRating: number; // 0-3
+  healthCheckRating: number;
 }
 
 export interface HospitalEntry extends BaseEntry {
@@ -45,13 +44,13 @@ export interface OccupationalHealthcareEntry extends BaseEntry {
   };
 }
 
-export type Entry = 
-  | HealthCheckEntry 
-  | HospitalEntry 
+export type Entry =
+  | HealthCheckEntry
+  | HospitalEntry
   | OccupationalHealthcareEntry;
 
-// Define NewEntry without the 'id' field
-export type NewEntry = Omit<Entry, 'id'>;
+type OmitDistributive<T, K extends keyof T> = T extends unknown? Omit<T, K> : never;
+export type NewEntry = OmitDistributive<Entry, 'id'>;
 
 export const NewPatientSchema = z.object({
   name: z.string(),
@@ -66,11 +65,11 @@ export interface Patient {
   id: string;
   name: string;
   dateOfBirth: string;
-  ssn?: string;
+  ssn: string;
   gender: Gender;
   occupation: string;
   entries: Entry[];
 }
 
 export type NewPatientEntry = z.infer<typeof NewPatientSchema>;
-export type NonSensitivePatient = Omit<Patient, 'ssn' | 'entries'> & { entries: Entry[] };
+export type NonSensitivePatient = Omit<Patient, 'ssn' | 'entries'>;

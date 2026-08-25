@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import patientService from '../patientService.js';
-import { NewEntry, Patient, Entry, NewPatientSchema } from '../types.js';
+import { NewPatientSchema, Patient, NewEntry } from '../types.js';
 
 const router = express.Router();
 
@@ -36,8 +36,8 @@ router.post('/:id/entries', (req: Request, res: Response) => {
   try {
     const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
     const newEntry = req.body as NewEntry;
-    
-    const addedEntry: Entry | undefined = patientService.addEntry(id, newEntry);
+
+    const addedEntry = patientService.addEntry(id, newEntry);
     if (addedEntry) {
       res.json(addedEntry);
     } else {

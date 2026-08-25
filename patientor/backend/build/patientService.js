@@ -36,7 +36,7 @@ const addEntry = (patientId, entry) => {
     const id = uuid();
     const newEntry = {
         id,
-        ...entry
+        ...entry,
     };
     if (!patient.entries) {
         patient.entries = [];
