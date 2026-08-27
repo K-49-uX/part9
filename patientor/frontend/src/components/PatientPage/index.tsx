@@ -9,8 +9,7 @@ import { Patient, Entry, Gender } from "../../types";
 import patientService from "../../services/patients";
 
 const DetailsComponent = ({ entry }: { entry: Entry }) => {
-  const item = entry as Record<string, unknown>;
-
+const item = entry as unknown as Record<string, unknown>;
   switch (item.type) {
     case "Hospital": {
       const discharge = item.discharge as { date: string; criteria: string } | undefined;
@@ -191,7 +190,7 @@ const PatientPage = () => {
 
         {entriesList.length > 0 ? (
           entriesList.map((entry: Entry) => {
-            const rawEntry = entry as Record<string, unknown>;
+const rawEntry = entry as unknown as Record<string, unknown>;
             return (
               <Box key={entry.id} sx={{ border: '1px solid #ccc', borderRadius: '5px', padding: 2, marginBottom: 2 }}>
                 <Typography variant="body1">
