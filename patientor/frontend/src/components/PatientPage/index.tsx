@@ -1,13 +1,16 @@
-import { useState, useEffect, SyntheticEvent } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Container, Typography, Box, Button, TextField } from "@mui/material";
+import { Container, Typography, Box, Button } from "@mui/material";
 import MaleIcon from '@mui/icons-material/Male';
 import FemaleIcon from '@mui/icons-material/Female';
 import TransgenderIcon from '@mui/icons-material/Transgender';
+import axios from "axios";
 
-import { Patient, Entry, Gender, Diagnosis } from "../../types";
+import { Patient, Entry, Gender, Diagnosis, HealthCheckEntryWithoutId } from "../../types";
 import patientService from "../../services/patients";
 import EntryDetails from "./EntryDetails";
+import AddHealthCheckEntryForm from "./AddHealthCheckEntryForm";
+
 interface PatientPageProps {
   diagnoses: Diagnosis[];
 }
@@ -16,20 +19,16 @@ const PatientPage = ({ diagnoses }: PatientPageProps) => {
   const { id } = useParams<{ id: string }>();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-
-  const [date, setDate] = useState('');
-  const [description, setDescription] = useState('');
-  const [specialist, setSpecialist] = useState('');
+  const [error, setError] = useState<string | undefined>();
 
   useEffect(() => {
     const fetchPatient = async () => {
       if (!id) return;
       try {
         const fetchedPatient = await patientService.getById(id);
-        console.log("DEBUG - Fetched patient object:", fetchedPatient);
         setPatient(fetchedPatient);
       } catch (err) {
-        console.error("DEBUG - Error fetching patient:", err);
+        console.error("Error fetching patient:", err);
       }
     };
     void fetchPatient();
@@ -61,28 +60,27 @@ const PatientPage = ({ diagnoses }: PatientPageProps) => {
     return diagnosis ? diagnosis.name : '';
   };
 
-  const addEntry = async (event: SyntheticEvent) => {
-    event.preventDefault();
+  const submitNewEntry = async (values: HealthCheckEntryWithoutId) => {
     try {
-      const newEntry = await patientService.addEntry(patient.id, {
-        date,
-        description,
-        specialist,
-        type: "HealthCheck",
-        healthCheckRating: 0
-      });
-      
+      const newEntry = await patientService.addEntry(patient.id, values);
       setPatient({
         ...patient,
         entries: (patient.entries || []).concat(newEntry)
       });
-
       setModalOpen(false);
-      setDate('');
-      setDescription('');
-      setSpecialist('');
-    } catch (err) {
-      console.error("Error adding entry:", err);
+      setError(undefined);
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e)) {
+        if (e.response?.data && typeof e.response.data === 'string') {
+          setError(e.response.data);
+        } else if (e.response?.data?.error) {
+          setError(e.response.data.error);
+        } else {
+          setError("Unrecognized axios error");
+        }
+      } else {
+        setError("Unknown error occurred");
+      }
     }
   };
 
@@ -108,62 +106,23 @@ const PatientPage = ({ diagnoses }: PatientPageProps) => {
           entries ({entriesList.length})
         </Typography>
 
-        <Button 
-          variant="contained" 
-          color="primary" 
-          onClick={() => setModalOpen(true)}
-          sx={{ marginBottom: 2 }}
-        >
-          Add New Entry
-        </Button>
+        {!modalOpen && (
+          <Button 
+            variant="contained" 
+            color="primary" 
+            onClick={() => { setModalOpen(true); setError(undefined); }}
+            sx={{ marginBottom: 2 }}
+          >
+            Add New Entry
+          </Button>
+        )}
 
         {modalOpen && (
-          <Box sx={{ border: '1px solid grey', padding: 2, marginBottom: 2, borderRadius: 1 }}>
-            <Typography variant="h6" sx={{ marginBottom: 2 }}>New Entry</Typography>
-            <form onSubmit={addEntry}>
-              <TextField
-                label="Date"
-                type="date"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                value={date}
-                onChange={({ target }) => setDate(target.value)}
-                sx={{ marginBottom: 2 }}
-              />
-              <TextField
-                label="Description"
-                fullWidth
-                value={description}
-                onChange={({ target }) => setDescription(target.value)}
-                sx={{ marginBottom: 2 }}
-              />
-              <TextField
-                label="Specialist"
-                fullWidth
-                value={specialist}
-                onChange={({ target }) => setSpecialist(target.value)}
-                sx={{ marginBottom: 2 }}
-              />
-
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-                <Button 
-                  color="secondary" 
-                  variant="contained" 
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                >
-                  Cancel
-                </Button>
-                
-                <Button 
-                  type="submit" 
-                  variant="contained"
-                >
-                  Add
-                </Button>
-              </Box>
-            </form>
-          </Box>
+          <AddHealthCheckEntryForm
+            onSubmit={submitNewEntry}
+            onCancel={() => { setModalOpen(false); setError(undefined); }}
+            error={error}
+          />
         )}
 
         {entriesList.length > 0 ? (
@@ -174,8 +133,8 @@ const PatientPage = ({ diagnoses }: PatientPageProps) => {
               </Typography>
               <Typography variant="body2">diagnosed by {entry.specialist}</Typography>
               
-              {/* Render entry-specific details and icons */}
-            <EntryDetails entry={entry} />
+              <EntryDetails entry={entry} />
+              
               {entry.diagnosisCodes && entry.diagnosisCodes.length > 0 && (
                 <ul style={{ marginTop: '8px', paddingLeft: '20px' }}>
                   {entry.diagnosisCodes.map((code) => (
