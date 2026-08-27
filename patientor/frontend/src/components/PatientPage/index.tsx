@@ -7,38 +7,7 @@ import TransgenderIcon from '@mui/icons-material/Transgender';
 
 import { Patient, Entry, Gender, Diagnosis } from "../../types";
 import patientService from "../../services/patients";
-
-const DetailsComponent = ({ entry }: { entry: Entry }) => {
-  const item = entry as unknown as Record<string, unknown>;
-
-  switch (item.type) {
-    case "Hospital": {
-      const discharge = item.discharge as { date: string; criteria: string } | undefined;
-      return discharge ? (
-        <Typography variant="body2">
-          Discharge: {discharge.date} ({discharge.criteria})
-        </Typography>
-      ) : null;
-    }
-    case "OccupationalHealthcare": {
-      return (
-        <Typography variant="body2">
-          Employer: {String(item.employerName || '')}
-        </Typography>
-      );
-    }
-    case "HealthCheck": {
-      return (
-        <Typography variant="body2">
-          Health Rating: {String(item.healthCheckRating ?? '')}
-        </Typography>
-      );
-    }
-    default:
-      return null;
-  }
-};
-
+import EntryDetails from "./EntryDetails";
 interface PatientPageProps {
   diagnoses: Diagnosis[];
 }
@@ -117,7 +86,6 @@ const PatientPage = ({ diagnoses }: PatientPageProps) => {
     }
   };
 
-  console.log("DEBUG - Current patient state entries:", patient.entries);
   const entriesList = patient.entries ?? [];
 
   return (
@@ -199,27 +167,26 @@ const PatientPage = ({ diagnoses }: PatientPageProps) => {
         )}
 
         {entriesList.length > 0 ? (
-          entriesList.map((entry: Entry) => {
-            const rawEntry = entry as unknown as Record<string, unknown>;
-            return (
-              <Box key={entry.id} sx={{ border: '1px solid #ccc', borderRadius: '5px', padding: 2, marginBottom: 2 }}>
-                <Typography variant="body1">
-                  {entry.date} - {entry.description}
-                </Typography>
-                <Typography variant="body2">diagnosed by {String(rawEntry.specialist || '')}</Typography>
-                <DetailsComponent entry={entry} />
-                {entry.diagnosisCodes && entry.diagnosisCodes.length > 0 && (
-                  <ul>
-                    {entry.diagnosisCodes.map((code) => (
-                      <li key={code}>
-                        {code} {getDiagnosisName(code)}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </Box>
-            );
-          })
+          entriesList.map((entry: Entry) => (
+            <Box key={entry.id} sx={{ border: '1px solid #ccc', borderRadius: '5px', padding: 2, marginBottom: 2 }}>
+              <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                {entry.date} - {entry.description}
+              </Typography>
+              <Typography variant="body2">diagnosed by {entry.specialist}</Typography>
+              
+              {/* Render entry-specific details and icons */}
+            <EntryDetails entry={entry} />
+              {entry.diagnosisCodes && entry.diagnosisCodes.length > 0 && (
+                <ul style={{ marginTop: '8px', paddingLeft: '20px' }}>
+                  {entry.diagnosisCodes.map((code) => (
+                    <li key={code}>
+                      {code} {getDiagnosisName(code)}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Box>
+          ))
         ) : (
           <Typography variant="body2">No entries found.</Typography>
         )}
