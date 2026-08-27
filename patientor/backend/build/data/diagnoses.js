@@ -39,6 +39,22 @@ const diagnosesData = [
         "latin": "Calculus renum"
     },
     {
+        "code": "S62.5",
+        "name": "Fracture of thumb"
+    },
+    {
+        "code": "Z57.1",
+        "name": "Occupational exposure to radiation"
+    },
+    {
+        "code": "Z74.3",
+        "name": "Need for continuous supervision"
+    },
+    {
+        "code": "Z00.0",
+        "name": "General adult medical examination"
+    },
+    {
         "code": "I10",
         "name": "Essential (primary) hypertension",
         "latin": "Hypertensio essentialis (primaria)"

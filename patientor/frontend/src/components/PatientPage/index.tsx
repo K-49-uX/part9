@@ -5,11 +5,12 @@ import MaleIcon from '@mui/icons-material/Male';
 import FemaleIcon from '@mui/icons-material/Female';
 import TransgenderIcon from '@mui/icons-material/Transgender';
 
-import { Patient, Entry, Gender } from "../../types";
+import { Patient, Entry, Gender, Diagnosis } from "../../types";
 import patientService from "../../services/patients";
 
 const DetailsComponent = ({ entry }: { entry: Entry }) => {
-const item = entry as unknown as Record<string, unknown>;
+  const item = entry as unknown as Record<string, unknown>;
+
   switch (item.type) {
     case "Hospital": {
       const discharge = item.discharge as { date: string; criteria: string } | undefined;
@@ -38,7 +39,11 @@ const item = entry as unknown as Record<string, unknown>;
   }
 };
 
-const PatientPage = () => {
+interface PatientPageProps {
+  diagnoses: Diagnosis[];
+}
+
+const PatientPage = ({ diagnoses }: PatientPageProps) => {
   const { id } = useParams<{ id: string }>();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -80,6 +85,11 @@ const PatientPage = () => {
       default:
         return <TransgenderIcon />;
     }
+  };
+
+  const getDiagnosisName = (code: string) => {
+    const diagnosis = diagnoses.find(d => d.code === code);
+    return diagnosis ? diagnosis.name : '';
   };
 
   const addEntry = async (event: SyntheticEvent) => {
@@ -190,7 +200,7 @@ const PatientPage = () => {
 
         {entriesList.length > 0 ? (
           entriesList.map((entry: Entry) => {
-const rawEntry = entry as unknown as Record<string, unknown>;
+            const rawEntry = entry as unknown as Record<string, unknown>;
             return (
               <Box key={entry.id} sx={{ border: '1px solid #ccc', borderRadius: '5px', padding: 2, marginBottom: 2 }}>
                 <Typography variant="body1">
@@ -201,7 +211,9 @@ const rawEntry = entry as unknown as Record<string, unknown>;
                 {entry.diagnosisCodes && entry.diagnosisCodes.length > 0 && (
                   <ul>
                     {entry.diagnosisCodes.map((code) => (
-                      <li key={code}>{code}</li>
+                      <li key={code}>
+                        {code} {getDiagnosisName(code)}
+                      </li>
                     ))}
                   </ul>
                 )}
