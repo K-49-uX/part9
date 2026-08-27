@@ -1,7 +1,6 @@
 import express, { Request, Response } from 'express';
 import patientService from '../patientService.js';
-import { Patient, NewEntry } from '../types.js';
-import NewPatientSchema from '../utils.js';
+import toNewPatient, { newEntrySchema } from '../utils.js';
 
 const router = express.Router();
 
@@ -11,7 +10,7 @@ router.get('/', (_req: Request, res: Response) => {
 
 router.get('/:id', (req: Request, res: Response) => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-  const patient: Patient | undefined = patientService.findById(id);
+  const patient = patientService.findById(id);
   if (patient) {
     res.json(patient);
   } else {
@@ -21,8 +20,8 @@ router.get('/:id', (req: Request, res: Response) => {
 
 router.post('/', (req: Request, res: Response) => {
   try {
-
-    const newPatientEntry = NewPatientSchema(req.body);    const addedPatient = patientService.addPatient(newPatientEntry);
+    const newPatientEntry = toNewPatient(req.body);
+    const addedPatient = patientService.addPatient(newPatientEntry);
     res.json(addedPatient);
   } catch (error: unknown) {
     let errorMessage = 'Something went wrong.';
@@ -35,9 +34,10 @@ router.post('/', (req: Request, res: Response) => {
 
 router.post('/:id/entries', (req: Request, res: Response) => {
   try {
+    // Validate request body using our Zod schema
+    const newEntry = newEntrySchema.parse(req.body);
     const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-    const newEntry = req.body as NewEntry;
-
+    
     const addedEntry = patientService.addEntry(id, newEntry);
     if (addedEntry) {
       res.json(addedEntry);
@@ -47,9 +47,9 @@ router.post('/:id/entries', (req: Request, res: Response) => {
   } catch (error: unknown) {
     let errorMessage = 'Something went wrong.';
     if (error instanceof Error) {
-      errorMessage = 'Error: ' + error.message;
+      errorMessage = error.message;
     }
-    res.status(400).send(errorMessage);
+    res.status(400).send({ error: errorMessage });
   }
 });
 
