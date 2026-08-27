@@ -57,6 +57,7 @@ const patientsData = [
                 date: "2021-01-18",
                 type: "HealthCheck",
                 specialist: "MD House",
+                diagnosisCodes: ["Z57.1", "Z74.3", "M51.2"],
                 description: "Regular check up. All clear.",
                 healthCheckRating: 0
             }
