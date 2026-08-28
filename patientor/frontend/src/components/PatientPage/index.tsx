@@ -6,10 +6,10 @@ import FemaleIcon from '@mui/icons-material/Female';
 import TransgenderIcon from '@mui/icons-material/Transgender';
 import axios from "axios";
 
-import { Patient, Entry, Gender, Diagnosis, HealthCheckEntryWithoutId } from "../../types";
+import { Patient, Entry, Gender, Diagnosis, NewEntry } from "../../types";
 import patientService from "../../services/patients";
 import EntryDetails from "./EntryDetails";
-import AddHealthCheckEntryForm from "./AddHealthCheckEntryForm";
+import AddEntryForm from "./AddEntryForm";
 
 interface PatientPageProps {
   diagnoses: Diagnosis[];
@@ -60,7 +60,7 @@ const PatientPage = ({ diagnoses }: PatientPageProps) => {
     return diagnosis ? diagnosis.name : '';
   };
 
-  const submitNewEntry = async (values: HealthCheckEntryWithoutId) => {
+  const submitNewEntry = async (values: NewEntry) => {
     try {
       const newEntry = await patientService.addEntry(patient.id, values);
       setPatient({
@@ -118,7 +118,7 @@ const PatientPage = ({ diagnoses }: PatientPageProps) => {
         )}
 
         {modalOpen && (
-          <AddHealthCheckEntryForm
+          <AddEntryForm
             onSubmit={submitNewEntry}
             onCancel={() => { setModalOpen(false); setError(undefined); }}
             error={error}
