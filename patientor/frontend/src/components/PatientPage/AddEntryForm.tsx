@@ -1,18 +1,32 @@
 import { useState, SyntheticEvent } from "react";
-import { TextField, Button, Box, Typography, Alert, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
-import { NewEntry, HealthCheckRating } from "../../types";
+import { 
+  TextField, 
+  Button, 
+  Box, 
+  Typography, 
+  Alert, 
+  FormControl, 
+  InputLabel, 
+  Select, 
+  MenuItem, 
+  SelectChangeEvent, 
+  OutlinedInput, 
+  Chip 
+} from "@mui/material";
+import { NewEntry, HealthCheckRating, Diagnosis } from "../../types";
 
 interface Props {
   onSubmit: (values: NewEntry) => void;
   onCancel: () => void;
   error?: string;
+  diagnoses: Diagnosis[];
 }
 
 type EntryFormValues = {
   description: string;
   date: string;
   specialist: string;
-  diagnosisCodes: string;
+  diagnosisCodes: string[];
   healthCheckRating: string;
   employerName: string;
   sickLeaveStartDate: string;
@@ -21,14 +35,14 @@ type EntryFormValues = {
   dischargeCriteria: string;
 };
 
-const AddEntryForm = ({ onSubmit, onCancel, error }: Props) => {
+const AddEntryForm = ({ onSubmit, onCancel, error, diagnoses }: Props) => {
   const [entryType, setEntryType] = useState<"HealthCheck" | "OccupationalHealthcare" | "Hospital">("HealthCheck");
   
   const [formValues, setFormValues] = useState<EntryFormValues>({
     description: "",
     date: "",
     specialist: "",
-    diagnosisCodes: "",
+    diagnosisCodes: [],
     healthCheckRating: "0",
     employerName: "",
     sickLeaveStartDate: "",
@@ -45,12 +59,20 @@ const AddEntryForm = ({ onSubmit, onCancel, error }: Props) => {
     setEntryType(event.target.value as "HealthCheck" | "OccupationalHealthcare" | "Hospital");
   };
 
+  const handleDiagnosisChange = (event: SelectChangeEvent<string[]>) => {
+    const {
+      target: { value },
+    } = event;
+    setFormValues({
+      ...formValues,
+      diagnosisCodes: typeof value === 'string' ? value.split(',') : value,
+    });
+  };
+
   const addTheEntry = (event: SyntheticEvent) => {
     event.preventDefault();
 
-    const codesArray = formValues.diagnosisCodes
-      ? formValues.diagnosisCodes.split(",").map(code => code.trim())
-      : undefined;
+    const codesArray = formValues.diagnosisCodes.length > 0 ? formValues.diagnosisCodes : undefined;
 
     const baseFields = {
       description: formValues.description,
@@ -113,9 +135,10 @@ const AddEntryForm = ({ onSubmit, onCancel, error }: Props) => {
 
         <TextField
           label="Date"
-          placeholder="YYYY-MM-DD"
+          type="date"
           fullWidth
           required
+          InputLabelProps={{ shrink: true }}
           value={formValues.date}
           onChange={handleChange("date")}
           sx={{ marginBottom: 2 }}
@@ -136,24 +159,44 @@ const AddEntryForm = ({ onSubmit, onCancel, error }: Props) => {
           onChange={handleChange("specialist")}
           sx={{ marginBottom: 2 }}
         />
-        <TextField
-          label="Diagnosis Codes (comma-separated)"
-          fullWidth
-          value={formValues.diagnosisCodes}
-          onChange={handleChange("diagnosisCodes")}
-          sx={{ marginBottom: 2 }}
-        />
+
+        <FormControl fullWidth sx={{ marginBottom: 2 }}>
+          <InputLabel>Diagnosis codes</InputLabel>
+          <Select
+            multiple
+            value={formValues.diagnosisCodes}
+            onChange={handleDiagnosisChange}
+            input={<OutlinedInput label="Diagnosis codes" />}
+            renderValue={(selected) => (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {selected.map((code) => (
+                  <Chip key={code} label={code} />
+                ))}
+              </Box>
+            )}
+          >
+            {diagnoses.map((diagnosis) => (
+              <MenuItem key={diagnosis.code} value={diagnosis.code}>
+                {diagnosis.code} — {diagnosis.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         {entryType === "HealthCheck" && (
-          <TextField
-            label="Health Check Rating (0-3)"
-            type="number"
-            fullWidth
-            required
-            value={formValues.healthCheckRating}
-            onChange={handleChange("healthCheckRating")}
-            sx={{ marginBottom: 2 }}
-          />
+          <FormControl fullWidth sx={{ marginBottom: 2 }}>
+            <InputLabel>Health Check Rating</InputLabel>
+            <Select
+              value={formValues.healthCheckRating}
+              label="Health Check Rating"
+              onChange={(e) => setFormValues({ ...formValues, healthCheckRating: e.target.value })}
+            >
+              <MenuItem value="0">0 — Healthy</MenuItem>
+              <MenuItem value="1">1 — Low Risk</MenuItem>
+              <MenuItem value="2">2 — High Risk</MenuItem>
+              <MenuItem value="3">3 — Critical Risk</MenuItem>
+            </Select>
+          </FormControl>
         )}
 
         {entryType === "OccupationalHealthcare" && (

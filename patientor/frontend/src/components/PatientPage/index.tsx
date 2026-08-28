@@ -122,6 +122,7 @@ const PatientPage = ({ diagnoses }: PatientPageProps) => {
             onSubmit={submitNewEntry}
             onCancel={() => { setModalOpen(false); setError(undefined); }}
             error={error}
+            diagnoses={diagnoses}
           />
         )}
 
